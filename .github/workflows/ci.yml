@@ -1,0 +1,151 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install linting tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black
+
+      - name: Lint Python code
+        run: |
+          flake8 bin/*.py --max-line-length=100 --extend-ignore=E203,W503
+          black --check bin/*.py
+
+      - name: Check Nextflow syntax
+        run: |
+          curl -s https://get.nextflow.io | bash
+          ./nextflow config main.nf
+
+  validate:
+    name: Validate Configuration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Nextflow
+        run: |
+          curl -s https://get.nextflow.io | bash
+          chmod +x nextflow
+
+      - name: Validate pipeline
+        run: |
+          ./nextflow config main.nf -show-profiles
+
+      - name: Check conda environment
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          environment-file: envs/tagger.yaml
+          activate-environment: tagger
+
+      - name: Verify conda environment
+        shell: bash -l {0}
+        run: |
+          conda activate tagger
+          python --version
+          python -c "import pysam; print('pysam OK')"
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: [lint, validate]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Nextflow
+        run: |
+          curl -s https://get.nextflow.io | bash
+          chmod +x nextflow
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          environment-file: envs/tagger.yaml
+          activate-environment: tagger
+          auto-activate-base: false
+
+      - name: Install test dependencies
+        shell: bash -l {0}
+        run: |
+          conda activate tagger
+          pip install pytest
+
+      - name: Test help message
+        shell: bash -l {0}
+        run: |
+          conda activate tagger
+          ./nextflow run main.nf --help
+
+      - name: Test Python script
+        shell: bash -l {0}
+        run: |
+          conda activate tagger
+          python bin/tag_end_reason.py --help
+
+  documentation:
+    name: Check Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for required docs
+        run: |
+          test -f README.md || exit 1
+          test -f INSTALLATION.md || exit 1
+          test -f CONTRIBUTING.md || exit 1
+          test -f LICENSE || exit 1
+          test -f CHANGELOG.md || exit 1
+          echo "All required documentation files present"
+
+      - name: Check links in README
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          config-file: '.github/markdown-link-check-config.json'
+        continue-on-error: true
+
+  release-check:
+    name: Check Release Readiness
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [test, documentation]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check version in config
+        run: |
+          VERSION=$(grep "version" nextflow.config | cut -d"'" -f2)
+          echo "Current version: $VERSION"
+
+      - name: Check if version is tagged
+        run: |
+          VERSION=$(grep "version" nextflow.config | cut -d"'" -f2)
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "Version v$VERSION is already tagged"
+          else
+            echo "Version v$VERSION is not yet tagged - ready for release"
+          fi
