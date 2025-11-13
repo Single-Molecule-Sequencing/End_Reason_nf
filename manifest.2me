@@ -1,0 +1,263 @@
+{
+  "name": "end-reason-tagger",
+  "version": "1.0.0",
+  "title": "End Reason Tagger for ONT Reads",
+  "description": "Tag BAM files with end_reason metadata from POD5 files. This workflow adds comprehensive end_reason tags (SIGNAL_POSITIVE, SIGNAL_NEGATIVE, etc.) along with quality metrics and POD5 metadata to your BAM files.",
+  "author": "Single-Molecule-Sequencing",
+  "repository": "https://github.com/Single-Molecule-Sequencing/End_Reason_nf.git",
+  "license": "MIT",
+  "keywords": [
+    "nanopore",
+    "ont",
+    "bam",
+    "pod5",
+    "end_reason",
+    "quality",
+    "tagging",
+    "sequencing"
+  ],
+  "category": "Utility",
+  "compatibility": {
+    "epi2me_version": ">=4.0.0",
+    "nextflow_version": ">=21.04.0"
+  },
+  "workflow": {
+    "entrypoint": "main.nf",
+    "config": "nextflow.config",
+    "profile": "standard"
+  },
+  "inputs": [
+    {
+      "name": "bam_input",
+      "label": "BAM Input",
+      "type": "path",
+      "required": true,
+      "help": "Path to a single BAM file or directory containing BAM files to tag",
+      "pattern": "*.bam|bam_pass",
+      "description": "Select your aligned BAM file(s). These reads will be tagged with end_reason metadata from POD5 files."
+    },
+    {
+      "name": "pod5_dir",
+      "label": "POD5 Directory",
+      "type": "path",
+      "required": false,
+      "help": "Path to directory containing POD5 files (or single POD5 file). If not provided, only basic tags (AQ, LE) will be added.",
+      "pattern": "*.pod5|pod5_pass|pod5",
+      "description": "Select the directory containing your POD5 files. These contain the end_reason metadata."
+    },
+    {
+      "name": "pod5_json",
+      "label": "POD5 Metadata JSON (Optional)",
+      "type": "path",
+      "required": false,
+      "help": "Pre-extracted POD5 metadata JSON file for faster processing",
+      "pattern": "*.json",
+      "description": "If you have previously extracted POD5 metadata to JSON, provide it here for faster processing."
+    },
+    {
+      "name": "outdir",
+      "label": "Output Directory",
+      "type": "path",
+      "required": true,
+      "default": "./results",
+      "help": "Directory where tagged BAM files and reports will be saved",
+      "description": "Choose where to save your tagged BAM files and analysis reports."
+    }
+  ],
+  "parameters": [
+    {
+      "name": "write_pod5_json",
+      "label": "Cache POD5 Metadata to JSON",
+      "type": "path",
+      "required": false,
+      "help": "Save extracted POD5 metadata to this JSON file for reuse in future runs",
+      "advanced": true,
+      "description": "Optionally save POD5 metadata to JSON for significant speedup on subsequent runs."
+    },
+    {
+      "name": "log_level",
+      "label": "Logging Level",
+      "type": "string",
+      "required": false,
+      "default": "INFO",
+      "choices": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+      "help": "Set the verbosity of logging output",
+      "advanced": true,
+      "description": "Choose how much detail you want in the logs."
+    }
+  ],
+  "outputs": [
+    {
+      "name": "tagged_bams",
+      "label": "Tagged BAM Files",
+      "type": "bam",
+      "path": "tagged/*.endtag.bam",
+      "description": "BAM files with end_reason, quality, and metadata tags added"
+    },
+    {
+      "name": "bam_indexes",
+      "label": "BAM Indexes",
+      "type": "bai",
+      "path": "tagged/*.endtag.bam.bai",
+      "description": "Index files for the tagged BAM files"
+    },
+    {
+      "name": "summaries",
+      "label": "Summary Files",
+      "type": "tsv",
+      "path": "tagged/*.summary.tsv",
+      "description": "Summary statistics for each processed BAM file"
+    },
+    {
+      "name": "execution_report",
+      "label": "Execution Report",
+      "type": "html",
+      "path": "reports/execution_report.html",
+      "description": "Detailed execution report from Nextflow"
+    },
+    {
+      "name": "timeline",
+      "label": "Timeline Report",
+      "type": "html",
+      "path": "reports/timeline.html",
+      "description": "Timeline visualization of pipeline execution"
+    }
+  ],
+  "tags_added": {
+    "description": "The following tags are added to each read in the output BAM files:",
+    "tags": [
+      {
+        "tag": "ER:Z:",
+        "name": "End Reason",
+        "description": "End reason from POD5 (SIGNAL_POSITIVE, SIGNAL_NEGATIVE, UNBLOCK_MUX_CHANGE, etc.)"
+      },
+      {
+        "tag": "ZE:Z:",
+        "name": "End Reason (String)",
+        "description": "End reason as explicit string type"
+      },
+      {
+        "tag": "P5:i:",
+        "name": "POD5 Present",
+        "description": "Flag indicating if POD5 data was found for this read (1=yes, 0=no)"
+      },
+      {
+        "tag": "AQ:f:",
+        "name": "Average Quality",
+        "description": "Average base quality score calculated using Phred formula"
+      },
+      {
+        "tag": "LE:i:",
+        "name": "Read Length",
+        "description": "Length of the read in base pairs"
+      },
+      {
+        "tag": "NS:i:",
+        "name": "Number of Samples",
+        "description": "Number of samples from POD5 file"
+      },
+      {
+        "tag": "CH:i:",
+        "name": "Channel",
+        "description": "Sequencing channel number from POD5"
+      },
+      {
+        "tag": "SS:i:",
+        "name": "Start Sample",
+        "description": "Start sample number from POD5"
+      }
+    ]
+  },
+  "end_reasons": {
+    "description": "End reasons that may be found in your data:",
+    "types": [
+      {
+        "value": "SIGNAL_POSITIVE",
+        "description": "Read completed normally through the pore with expected current increase",
+        "interpretation": "Normal, successful read completion"
+      },
+      {
+        "value": "SIGNAL_NEGATIVE",
+        "description": "Large negative current drop (~80 pA), typically indicating pore blockage",
+        "interpretation": "May indicate pore blockage, strand issues, or contamination"
+      },
+      {
+        "value": "UNBLOCK_MUX_CHANGE",
+        "description": "Strand blocked the pore, prompting voltage reversal to eject it",
+        "interpretation": "Pore blockage detected and cleared"
+      },
+      {
+        "value": "DATA_SERVICE_UNBLOCK_MUX_CHANGE",
+        "description": "Read was actively ejected as part of adaptive sampling",
+        "interpretation": "Adaptive sampling rejection (not a quality issue)"
+      },
+      {
+        "value": "MUX_CHANGE",
+        "description": "Routine multiplexer scanning cycle, not related to the strand itself",
+        "interpretation": "Normal sequencing operation"
+      },
+      {
+        "value": "ANALYSIS_CONFIG_CHANGE",
+        "description": "Analysis configuration changed during the sequencing run",
+        "interpretation": "Configuration change during run"
+      }
+    ]
+  },
+  "requirements": {
+    "conda": {
+      "enabled": true,
+      "environment": "envs/tagger.yaml"
+    },
+    "system": {
+      "min_memory_gb": 4,
+      "min_cpus": 2,
+      "min_disk_gb": 10
+    },
+    "dependencies": [
+      "python>=3.11",
+      "pysam>=0.22",
+      "samtools>=1.20",
+      "pod5",
+      "pandas"
+    ]
+  },
+  "usage": {
+    "quick_start": "Select your BAM file(s) and POD5 directory, then click Run. The pipeline will tag your BAM files with end_reason metadata.",
+    "typical_runtime": "5-10 minutes per GB of BAM data",
+    "tips": [
+      "Use POD5 JSON caching for significant speedup when processing multiple BAM files from the same sequencing run",
+      "If POD5 files are not available, the pipeline will still add quality (AQ) and length (LE) tags",
+      "Output BAM files maintain the same alignment information as input, only tags are added"
+    ]
+  },
+  "citation": {
+    "text": "If you use this workflow, please cite:\nEnd_Reason_nf: Nextflow pipeline for tagging ONT BAM files with end_reason metadata\nhttps://github.com/Single-Molecule-Sequencing/End_Reason_nf",
+    "doi": null
+  },
+  "help": {
+    "documentation": "https://github.com/Single-Molecule-Sequencing/End_Reason_nf/blob/main/README.md",
+    "quick_start": "https://github.com/Single-Molecule-Sequencing/End_Reason_nf/blob/main/QUICK_START.md",
+    "installation": "https://github.com/Single-Molecule-Sequencing/End_Reason_nf/blob/main/INSTALLATION.md",
+    "issues": "https://github.com/Single-Molecule-Sequencing/End_Reason_nf/issues"
+  },
+  "validation": {
+    "input_bam": {
+      "file_exists": true,
+      "file_readable": true,
+      "file_extension": [".bam"]
+    },
+    "pod5_dir": {
+      "directory_exists": true,
+      "contains_pod5": true
+    }
+  },
+  "notifications": {
+    "on_success": "BAM files successfully tagged! Check the output directory for tagged BAM files with .endtag.bam extension.",
+    "on_failure": "Pipeline execution failed. Please check the logs in the work directory and ensure your inputs are valid.",
+    "warnings": [
+      "If no POD5 directory is provided, only basic tags (AQ, LE, P5=0) will be added",
+      "Large datasets may take several hours to process",
+      "Ensure sufficient disk space for output files (similar size to input BAM files)"
+    ]
+  }
+}
