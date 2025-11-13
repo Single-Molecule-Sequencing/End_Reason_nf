@@ -1,8 +1,0 @@
-{
-    "name": "End_Reason_nf",
-    "version": "1.0.0",
-    "description": "Tag BAM files with end_reason metadata from POD5 files",
-    "entrypoint": "main.nf",
-    "config": "nextflow.config",
-    "schema": "nextflow_schema.json"
-}
