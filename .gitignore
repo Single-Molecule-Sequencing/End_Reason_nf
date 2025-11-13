@@ -15,6 +15,7 @@ test_results/
 
 # Keep essential JSON files
 !nextflow_schema.json
+!manifest.json
 !package.json
 !.github/**/*.json
 
