@@ -1,0 +1,44 @@
+{
+    "files": {
+        "workflow-report": {
+            "filepath": "{{ output }}/execution_report.html",
+            "title": "Workflow execution report",
+            "description": "Report of workflow execution including resource usage and timeline.",
+            "mime-type": "text/html",
+            "optional": false,
+            "type": "aggregated"
+        },
+        "tagged-bams": {
+            "filepath": "{{ output }}/tagged/{{ alias }}.endtag.bam",
+            "title": "Tagged BAM file",
+            "description": "BAM file with end_reason tags, quality metrics, and POD5 metadata added to each read.",
+            "mime-type": "application/octet-stream",
+            "optional": false,
+            "type": "per-sample"
+        },
+        "bam-indexes": {
+            "filepath": "{{ output }}/tagged/{{ alias }}.endtag.bam.bai",
+            "title": "BAM index file",
+            "description": "Index file for the tagged BAM file.",
+            "mime-type": "application/octet-stream",
+            "optional": false,
+            "type": "per-sample"
+        },
+        "summary-stats": {
+            "filepath": "{{ output }}/tagged/{{ alias }}.endtag.summary.tsv",
+            "title": "Summary statistics",
+            "description": "Tab-separated summary statistics for the tagged BAM file.",
+            "mime-type": "text/tab-separated-values",
+            "optional": true,
+            "type": "per-sample"
+        },
+        "timeline-report": {
+            "filepath": "{{ output }}/timeline.html",
+            "title": "Timeline report",
+            "description": "Timeline visualization of workflow execution.",
+            "mime-type": "text/html",
+            "optional": true,
+            "type": "aggregated"
+        }
+    }
+}
