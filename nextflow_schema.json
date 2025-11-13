@@ -1,0 +1,171 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/Single-Molecule-Sequencing/End_Reason_nf/main/nextflow_schema.json",
+    "title": "Single-Molecule-Sequencing/End_Reason_nf",
+    "workflow_title": "End Reason Tagger",
+    "description": "Tag BAM files with end_reason metadata from POD5 files.",
+    "url": "https://github.com/Single-Molecule-Sequencing/End_Reason_nf",
+    "type": "object",
+    "definitions": {
+        "input": {
+            "title": "Input Options",
+            "type": "object",
+            "fa_icon": "fas fa-arrow-right",
+            "description": "Parameters for finding and handling input data for analysis.",
+            "properties": {
+                "bam_input": {
+                    "type": "string",
+                    "format": "path",
+                    "title": "BAM Input",
+                    "description": "BAM files to tag with end_reason metadata.",
+                    "help_text": "This accepts: (i) the path to a single BAM file; (ii) the path to a directory containing BAM files. The workflow will tag all reads in the BAM file(s) with end_reason metadata from POD5 files, along with quality metrics."
+                },
+                "pod5_dir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "title": "POD5 Directory",
+                    "description": "Path to directory containing POD5 files (optional).",
+                    "help_text": "Directory containing POD5 files with end_reason metadata. If not provided, only basic tags (AQ, LE) will be added to the BAM file. POD5 files are required for extracting end_reason information (SIGNAL_POSITIVE, SIGNAL_NEGATIVE, UNBLOCK_MUX_CHANGE, etc.)."
+                },
+                "pod5_json": {
+                    "type": "string",
+                    "format": "file-path",
+                    "title": "POD5 Metadata JSON",
+                    "description": "Pre-extracted POD5 metadata JSON file for faster processing (optional).",
+                    "help_text": "If you have previously extracted POD5 metadata to JSON using the --write_pod5_json option, provide it here for much faster processing. This can provide 10x+ speedup when processing multiple BAM files from the same sequencing run."
+                }
+            },
+            "required": [
+                "bam_input"
+            ]
+        },
+        "output": {
+            "title": "Output Options",
+            "type": "object",
+            "fa_icon": "fas fa-arrow-left",
+            "description": "Parameters for saving and naming workflow outputs.",
+            "properties": {
+                "outdir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "default": "results",
+                    "title": "Output Directory",
+                    "description": "Directory for output files.",
+                    "help_text": "Output directory where tagged BAM files and reports will be saved. Tagged BAMs will be in the 'tagged/' subdirectory with '.endtag.bam' extension."
+                },
+                "write_pod5_json": {
+                    "type": "string",
+                    "format": "file-path",
+                    "title": "Cache POD5 Metadata",
+                    "description": "Save POD5 metadata to JSON for reuse (optional).",
+                    "help_text": "Optionally save extracted POD5 metadata to a JSON file. This cached metadata can be reused with --pod5_json for significant speedup when processing multiple BAM files from the same sequencing run."
+                }
+            }
+        },
+        "advanced": {
+            "title": "Advanced Options",
+            "type": "object",
+            "fa_icon": "fas fa-cog",
+            "description": "Advanced parameters for workflow tuning.",
+            "properties": {
+                "log_level": {
+                    "type": "string",
+                    "default": "INFO",
+                    "enum": [
+                        "DEBUG",
+                        "INFO",
+                        "WARNING",
+                        "ERROR",
+                        "CRITICAL"
+                    ],
+                    "title": "Logging Level",
+                    "description": "Set the verbosity of logging output.",
+                    "help_text": "Choose the level of detail in the logs. Use DEBUG for troubleshooting, INFO for normal operation, WARNING or ERROR for minimal output."
+                }
+            }
+        },
+        "misc": {
+            "title": "Miscellaneous Options",
+            "type": "object",
+            "fa_icon": "fas fa-clipboard-list",
+            "description": "Everything else.",
+            "properties": {
+                "help": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Display help text.",
+                    "fa_icon": "fas fa-question-circle",
+                    "hidden": true
+                },
+                "version": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Display version and exit.",
+                    "fa_icon": "fas fa-code-branch",
+                    "hidden": true
+                }
+            }
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "#/definitions/input"
+        },
+        {
+            "$ref": "#/definitions/output"
+        },
+        {
+            "$ref": "#/definitions/advanced"
+        },
+        {
+            "$ref": "#/definitions/misc"
+        }
+    ],
+    "properties": {
+        "process_label": {
+            "type": "string",
+            "description": "The main process label for template processes to use by default",
+            "hidden": true,
+            "default": "wf_end_reason"
+        },
+        "aws_image_prefix": {
+            "type": "string",
+            "hidden": true
+        },
+        "aws_queue": {
+            "type": "string",
+            "hidden": true
+        },
+        "monochrome_logs": {
+            "type": "boolean",
+            "default": false,
+            "hidden": true
+        },
+        "validate_params": {
+            "type": "boolean",
+            "default": true,
+            "hidden": true
+        },
+        "show_hidden_params": {
+            "type": "boolean",
+            "default": false,
+            "hidden": true
+        }
+    },
+    "docs": {
+        "intro": "## Introduction\n\nThis workflow tags BAM files with end_reason metadata extracted from Oxford Nanopore POD5 files. It adds comprehensive tags including end reasons (SIGNAL_POSITIVE, SIGNAL_NEGATIVE, etc.), quality metrics, and POD5 metadata to each read.\n\n## Tags Added\n\nThe workflow adds the following tags to each read:\n\n- **ER:Z:** End reason from POD5 (e.g., SIGNAL_POSITIVE)\n- **ZE:Z:** End reason as explicit string type\n- **P5:i:** POD5 data found flag (1=yes, 0=no)\n- **AQ:f:** Average quality score (Phred formula)\n- **LE:i:** Read length in base pairs\n- **NS:i:** Number of samples (from POD5)\n- **CH:i:** Channel number (from POD5)\n- **SS:i:** Start sample (from POD5)\n\n## Compute requirements\n\n- Minimum: 2 CPUs, 4GB memory\n- Recommended: 4 CPUs, 8GB memory\n- Typical runtime: 5-10 minutes per GB of BAM data",
+        "links": "## Useful links\n\n* [GitHub Repository](https://github.com/Single-Molecule-Sequencing/End_Reason_nf)\n* [Installation Guide](https://github.com/Single-Molecule-Sequencing/End_Reason_nf/blob/main/INSTALLATION.md)\n* [Quick Start](https://github.com/Single-Molecule-Sequencing/End_Reason_nf/blob/main/QUICK_START.md)\n* [Report Issues](https://github.com/Single-Molecule-Sequencing/End_Reason_nf/issues)"
+    },
+    "resources": {
+        "recommended": {
+            "cpus": 4,
+            "memory": "8GB"
+        },
+        "minimum": {
+            "cpus": 2,
+            "memory": "4GB"
+        },
+        "run_time": "5-10 minutes per GB of BAM data",
+        "arm_support": false
+    }
+}

@@ -13,6 +13,11 @@ test_results/
 *.pod5.gz
 *.json
 
+# Keep essential JSON files
+!nextflow_schema.json
+!package.json
+!.github/**/*.json
+
 # Conda environments
 .conda/
 envs/.conda/

@@ -6,29 +6,34 @@ This pipeline can be installed and run through the **EPI2ME Desktop** applicatio
 
 ## Installation in EPI2ME Desktop
 
-### Method 1: Direct Installation from GitHub
+### Method 1: Direct Installation from GitHub (Recommended)
 
 1. **Open EPI2ME Desktop**
    - Launch the EPI2ME Desktop application
 
-2. **Add Workflow**
-   - Click "Add Workflow" or "Import Workflow"
-   - Select "From GitHub Repository"
+2. **Import Workflow**
+   - Click "Import Workflow" or the "+" button
+   - Select "From GitHub Repository" or "Import from URL"
 
 3. **Enter Repository URL**
+   ```
+   https://github.com/Single-Molecule-Sequencing/End_Reason_nf
+   ```
+
+   Or use the full git URL:
    ```
    https://github.com/Single-Molecule-Sequencing/End_Reason_nf.git
    ```
 
 4. **Configure Installation**
-   - The application will detect the `manifest.2me` file
-   - Review the workflow details
-   - Click "Install"
+   - The application will detect the `nextflow_schema.json` file
+   - Review the workflow details and parameters
+   - Click "Add" or "Install"
 
 5. **Wait for Setup**
    - EPI2ME will download the workflow
-   - Conda environment will be created automatically
-   - Dependencies will be installed
+   - Dependencies will be prepared
+   - Workflow will appear in your workflow list
 
 ### Method 2: Manual Installation
 
@@ -39,9 +44,22 @@ This pipeline can be installed and run through the **EPI2ME Desktop** applicatio
 
 2. **Import to EPI2ME**
    - Open EPI2ME Desktop
-   - Click "Add Workflow" → "From Local Directory"
-   - Select the `End_Reason_nf` directory
-   - EPI2ME will read the `manifest.2me` file
+   - Click "Import Workflow" → "From Local Directory"
+   - Navigate to and select the `End_Reason_nf` directory
+   - EPI2ME will read the `nextflow_schema.json` file
+   - Click "Add" to complete the import
+
+## Requirements
+
+### EPI2ME Desktop Version
+- **Minimum Version**: 5.0.0 or later (with Nextflow schema support)
+- **Recommended**: Latest version
+
+### Important Notes
+- This workflow uses the standard Nextflow schema format (`nextflow_schema.json`)
+- EPI2ME Desktop will automatically detect and parse workflow parameters
+- The workflow uses conda for dependency management
+- First run may take longer while conda environment is created
 
 ## Using the Workflow in EPI2ME
 
