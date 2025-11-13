@@ -1,0 +1,61 @@
+# Nextflow work directory
+work/
+.nextflow/
+.nextflow.log*
+
+# Results and outputs
+results/
+test_results/
+*.bam
+*.bai
+*.bam.bai
+*.pod5
+*.pod5.gz
+*.json
+
+# Conda environments
+.conda/
+envs/.conda/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Reports (these get regenerated)
+reports/
+*.html
+trace.txt
+timeline.html
+dag.html
+
+# Logs
+*.log
+
+# Test data (too large for git)
+test_data/*.bam
+test_data/*.pod5
+test_data/*.pod5.gz
+
+# Keep test data README
+!test_data/README.md
