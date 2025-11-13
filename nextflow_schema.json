@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/Single-Molecule-Sequencing/End_Reason_nf/main/nextflow_schema.json",
-    "title": "Single-Molecule-Sequencing/End_Reason_nf",
+    "title": "End_Reason_nf",
     "workflow_title": "End Reason Tagger",
     "description": "Tag BAM files with end_reason metadata from POD5 files.",
     "url": "https://github.com/Single-Molecule-Sequencing/End_Reason_nf",
