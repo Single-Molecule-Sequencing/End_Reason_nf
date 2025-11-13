@@ -19,6 +19,7 @@ test_results/
 !output_definition.json
 !epi2me.json
 !2me.json
+!2me-manifest.json
 !package.json
 !.github/**/*.json
 
