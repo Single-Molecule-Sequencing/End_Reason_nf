@@ -129,7 +129,7 @@ log.info ""
 process TAG_END_REASON {
     tag { sample_id }
     publishDir "${params.outdir}/tagged", mode: 'copy', overwrite: true
-    conda "${projectDir}/envs/tagger.yaml"
+    // conda directive removed - uses Docker by default (see nextflow.config)
     cpus 2
     memory '4 GB'
     errorStrategy 'retry'
