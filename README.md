@@ -2,29 +2,34 @@
 
 ## Overview
 
-This Nextflow pipeline tags BAM files with end_reason metadata extracted from Oxford Nanopore POD5 files. It was imported from `../kmathew/nextflow_implementation/your-pipeline` on 2025-11-12.
+This Nextflow pipeline tags BAM files with end_reason metadata extracted from Oxford Nanopore POD5 files. It adds essential sequencing metadata to each read, including:
 
-## Pipeline Evaluation
+- **End reasons** (why sequencing stopped: signal positive/negative, unblock, etc.)
+- **Quality metrics** (average quality score, read length)
+- **Channel information** (channel number, sample counts)
+- **POD5 presence flag** (whether POD5 data was found for each read)
 
-### Source Analysis
+## Quick Start
 
-Two implementations were found in the kmathew directory:
+**Prerequisites:** Nextflow (≥21.04.0), Docker or Conda
 
-1. **Simple Implementation** (`tag_bam.nf`):
-   - Standalone single-process pipeline
-   - Uses `tag_bam_with_pod5.py` script
-   - More verbose logging with print statements
-   - Good for quick tagging tasks
+```bash
+# 1. Run the pipeline
+nextflow run main.nf \
+  --bam_input /path/to/your/sample.bam \
+  --pod5_dir /path/to/your/pod5_files \
+  --outdir results
 
-2. **Modular Implementation** (`your-pipeline/`):
-   - Structured with separate workflow and module files
-   - Uses `tag_end_reason.py` script (✓ **Selected for import**)
-   - Professional Python logging
-   - Support for POD5 JSON caching
-   - Better error handling and documentation
-   - More production-ready
+# 2. Check the output
+ls -lh results/tagged/
+samtools view results/tagged/*.endtag.bam | head
+```
 
-### Tags Added to BAM Files
+**Need help?** Run `nextflow run main.nf --help` or see [QUICK_START.md](QUICK_START.md) for detailed examples.
+
+**New to Nextflow?** See [INSTALLATION.md](INSTALLATION.md) for setup instructions.
+
+## What Tags Are Added?
 
 The pipeline adds the following tags to each read:
 
@@ -39,26 +44,13 @@ The pipeline adds the following tags to each read:
 | `AQ` | Float | Average quality score (Phred formula) | Computed from BAM |
 | `LE` | Integer | Read length | Computed from BAM |
 
-### End Reason Values
-
-The pipeline normalizes end_reason strings to uppercase:
-
-- `SIGNAL_POSITIVE` - Normal completion through the pore
-- `SIGNAL_NEGATIVE` - Large negative current drop (typically pore blockage)
-- `UNBLOCK_MUX_CHANGE` - Strand blocked pore, voltage reversal triggered
-- `DATA_SERVICE_UNBLOCK_MUX_CHANGE` - Active ejection via adaptive sampling
+**End Reason Values** include:
+- `SIGNAL_POSITIVE` - Normal completion
+- `SIGNAL_NEGATIVE` - Pore blockage  
+- `UNBLOCK_MUX_CHANGE` - Voltage reversal unblock
+- `DATA_SERVICE_UNBLOCK_MUX_CHANGE` - Adaptive sampling ejection
 - `MUX_CHANGE` - Routine multiplexer scan
-- `ANALYSIS_CONFIG_CHANGE` - Analysis configuration changed during run
-
-### Quality Score Calculation
-
-Average quality (`AQ`) is calculated using the proper Phred formula:
-
-```
-AQ = -10 * log10(sum(10^(-q/10)) / |q|)
-```
-
-This gives a more accurate representation than simple arithmetic mean.
+- `ANALYSIS_CONFIG_CHANGE` - Config change during run
 
 ## Requirements
 
@@ -199,6 +191,21 @@ results/
 ## Testing
 
 See `test_data/README.md` for information about running tests with example data.
+
+## Implementation Background
+
+### Pipeline Selection
+
+This implementation was selected from two candidate pipelines in the kmathew directory:
+
+1. **Simple Implementation** (`tag_bam.nf`): Standalone single-process pipeline with verbose logging
+2. **Modular Implementation** (`your-pipeline/`): ✓ **Selected** - Production-ready with POD5 JSON caching, professional logging, and better error handling
+
+### Technical Details
+
+- **Quality Score Calculation**: Average quality (`AQ`) uses proper Phred formula: `AQ = -10 * log10(sum(10^(-q/10)) / |q|)`
+- **Error Handling**: Up to 2 retries on failure with graceful handling of missing POD5 data
+- **Performance**: Uses 2 CPUs and 4 GB RAM per process by default; POD5 JSON caching significantly speeds up multiple runs
 
 ## Source Attribution
 
