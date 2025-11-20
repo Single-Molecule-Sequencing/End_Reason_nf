@@ -25,9 +25,11 @@ ls -lh results/tagged/
 samtools view results/tagged/*.endtag.bam | head
 ```
 
-**Need help?** Run `nextflow run main.nf --help` or see [QUICK_START.md](QUICK_START.md) for detailed examples.
-
-**New to Nextflow?** See [INSTALLATION.md](INSTALLATION.md) for setup instructions.
+**Need help?** See these guides:
+- 📖 [USAGE_EXAMPLES.md](USAGE_EXAMPLES.md) - Copy-paste examples for common scenarios
+- 🚀 [QUICK_START.md](QUICK_START.md) - Step-by-step getting started guide
+- 🔧 [INSTALLATION.md](INSTALLATION.md) - Setup instructions
+- ❓ Run `nextflow run main.nf --help` for command-line help
 
 ## What Tags Are Added?
 
