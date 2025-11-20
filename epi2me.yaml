@@ -1,0 +1,20 @@
+# EPI2ME pipeline metadata for End Reason Tagger
+name: End Reason Tagger
+id: wf-end-reason
+description: Tag BAM files with end_reason metadata from POD5 files using Nextflow.
+version: v1.0.0
+author: Single-Molecule-Sequencing
+documentation: https://github.com/Single-Molecule-Sequencing/End_Reason_nf
+entrypoint: main.nf
+schema: nextflow_schema.json
+dependencies:
+  - conda: envs/tagger.yaml
+  - python: bin/tag_end_reason.py
+  
+# Optional fields
+icon: faTags
+tags:
+  - bam
+  - pod5
+  - metadata
+  - tagging

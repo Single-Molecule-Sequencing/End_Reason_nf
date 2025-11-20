@@ -30,6 +30,7 @@ params.outdir = "./results"
 params.write_pod5_json = null
 params.log_level = "INFO"
 params.help = false
+params.version = false
 
 /*
  * Help message
@@ -55,6 +56,7 @@ def helpMessage() {
       --write_pod5_json Path to save extracted POD5 metadata as JSON for reuse
       --log_level       Logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL (default: INFO)
       --help            Show this help message
+      --version         Show workflow version and exit
 
     Examples:
       # Process a single BAM file with POD5 directory
@@ -92,6 +94,11 @@ def helpMessage() {
 if (params.help) {
     helpMessage()
     exit 0
+}
+
+if (params.version) {
+  println "End Reason Tagger ${workflow.manifest.version ?: 'dev'}"
+  exit 0
 }
 
 /*

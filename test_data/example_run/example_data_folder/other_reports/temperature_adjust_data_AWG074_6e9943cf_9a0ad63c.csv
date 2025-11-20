@@ -1,0 +1,4 @@
+acquisition_duration,current_target_temperature,num_reads,current_speed,new_target_temperature
+840,38.5,414,464.23472683671594,
+1440,38.5,838,462.9330572888504,
+2040,38.5,1268,463.08658311043627,37.5

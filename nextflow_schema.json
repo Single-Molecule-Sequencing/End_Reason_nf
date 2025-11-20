@@ -1,9 +1,18 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/Single-Molecule-Sequencing/End_Reason_nf/main/nextflow_schema.json",
-    "title": "Single-Molecule-Sequencing/End_Reason_nf",
+    "title": "Single-Molecule-Sequencing/wf-end-reason",
+    "workflow_id": "wf-end-reason",
     "workflow_title": "End Reason Tagger",
+    "workflow_version": "v1.0.0",
     "description": "Tag BAM files with end_reason metadata from POD5 files.",
+    "icon": "faTags",
+    "tags": [
+        "bam",
+        "pod5",
+        "metadata",
+        "tagging"
+    ],
     "url": "https://github.com/Single-Molecule-Sequencing/End_Reason_nf",
     "type": "object",
     "definitions": {
