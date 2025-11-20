@@ -174,7 +174,9 @@ def add_tags_to_bam(
         read_ids_seen = set()
 
         with pysam.AlignmentFile(bam_file, "rb", check_sq=False) as in_bam:
-            with pysam.AlignmentFile(output_file_path, "wb", header=in_bam.header, check_sq=False) as out_bam:
+            with pysam.AlignmentFile(
+                output_file_path, "wb", header=in_bam.header, check_sq=False
+            ) as out_bam:
                 for read in in_bam:
                     read_id = read.query_name
                     if read_id in read_ids_seen and not read.is_paired:
@@ -231,7 +233,12 @@ def load_pod5_json(path: str) -> Dict[str, Dict[str, object]]:
     if isinstance(records, dict):
         return records
     if isinstance(records, list):
-        return {record["read_id"]: {k: v for k, v in record.items() if k != "read_id"} for record in records}
+        return {
+            record["read_id"]: {
+                k: v for k, v in record.items() if k != "read_id"
+            }
+            for record in records
+        }
     raise ValueError(f"Unexpected JSON structure in {path}")
 
 

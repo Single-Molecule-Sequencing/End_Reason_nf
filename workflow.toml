@@ -1,0 +1,35 @@
+[workflow]
+name = "wf-end-reason"
+title = "End Reason Tagger"
+version = "1.0.0"
+description = "Tag BAM files with end_reason metadata from POD5 files"
+url = "https://github.com/Single-Molecule-Sequencing/End_Reason_nf"
+license = "MIT"
+
+[workflow.files]
+entrypoint = "main.nf"
+config = "nextflow.config"
+schema = "nextflow_schema.json"
+
+[workflow.author]
+name = "Single-Molecule-Sequencing"
+url = "https://github.com/Single-Molecule-Sequencing"
+
+[requirements]
+nextflow = ">=21.04.0"
+epi2me = ">=5.0.0"
+
+[requirements.system]
+cpus_min = 2
+cpus_recommended = 4
+memory_min = "4GB"
+memory_recommended = "8GB"
+disk_min = "10GB"
+
+[conda]
+enabled = true
+environment = "envs/tagger.yaml"
+
+[metadata]
+categories = ["Utility", "BAM Processing", "Quality Control"]
+tags = ["nanopore", "ont", "bam", "pod5", "end_reason", "quality", "tagging"]

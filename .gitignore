@@ -15,6 +15,11 @@ test_results/
 
 # Keep essential JSON files
 !nextflow_schema.json
+!manifest.json
+!output_definition.json
+!epi2me.json
+!2me.json
+!2me-manifest.json
 !package.json
 !.github/**/*.json
 

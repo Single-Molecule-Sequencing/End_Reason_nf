@@ -1,0 +1,16 @@
+.git
+.gitignore
+.nextflow*
+work
+results
+test_results
+*.bam
+*.bai
+*.pod5
+*.pod5.gz
+*.log
+README.md
+*.md
+.github
+examples
+test_data
